@@ -1,0 +1,41 @@
+# =====================================================================
+#  Lado CLIENTE — copie o que fizer sentido para ~/.ssh/config
+#  Hardening não é só servidor: o cliente também escolhe algoritmos
+#  e decide se repassa o seu agent para máquinas de terceiros.
+# =====================================================================
+
+Host *
+    # Nunca repasse agent/X11 por padrão
+    ForwardAgent no
+    ForwardX11 no
+    # Verifica a chave do host; pergunte em host novo, recuse se mudar
+    StrictHostKeyChecking ask
+    VerifyHostKeyDNS ask
+    HashKnownHosts yes
+    UpdateHostKeys yes
+    # Só oferece a chave configurada para o host (evita "Too many auth failures")
+    IdentitiesOnly yes
+    AddKeysToAgent 1h
+    # Algoritmos modernos
+    KexAlgorithms sntrup761x25519-sha512@openssh.com,curve25519-sha256,curve25519-sha256@libssh.org
+    HostKeyAlgorithms ssh-ed25519-cert-v01@openssh.com,ssh-ed25519,rsa-sha2-512,rsa-sha2-256
+    Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com
+    MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+    # Mantém a sessão viva atrás de NAT
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+
+# Exemplo: servidor com porta e chave próprias
+Host vps0
+    HostName vps0.exemplo.com.br
+    User sl
+    Port 22
+    IdentityFile ~/.ssh/id_ed25519_vps0
+
+# Exemplo: acessar servidor interno passando por um bastion
+# (ProxyJump no lugar de ForwardAgent: o bastion nunca vê sua chave)
+Host interno-db
+    HostName 10.0.10.20
+    User sl
+    ProxyJump vps0
+    IdentityFile ~/.ssh/id_ed25519_interno

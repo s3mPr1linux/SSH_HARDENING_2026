@@ -1,0 +1,10 @@
+# Nunca versione chaves ou backups
+*.pem
+*_key
+*_key.pub
+id_*
+!docs/**
+ssh-backup-*.tar.gz
+*.swp
+.DS_Store
+linkedin/carousel.html

@@ -1,0 +1,39 @@
+# =====================================================================
+#  Destino: /etc/fail2ban/jail.d/sshd.local
+#
+#  Com PasswordAuthentication no, o Fail2Ban deixa de ser a defesa
+#  principal e vira REDUÇÃO DE RUÍDO + telemetria: menos linhas no
+#  auth.log, menos carga no sshd e IPs ofensores para o seu SIEM.
+#
+#  Reincidentes recebem ban progressivo (bantime.increment).
+#  Teste:  fail2ban-client status sshd
+# =====================================================================
+
+[DEFAULT]
+# Nunca bana a sua própria origem de gestão/VPN.
+ignoreip = 127.0.0.1/8 ::1
+#          10.0.0.0/24  203.0.113.10
+
+bantime            = 1h
+findtime           = 10m
+maxretry           = 3
+bantime.increment  = true
+bantime.factor     = 2
+bantime.maxtime    = 1w
+
+[sshd]
+enabled  = true
+# "aggressive" também pega pré-autenticação, chaves recusadas e scanners.
+mode     = aggressive
+port     = ssh
+backend  = systemd
+# Debian/Ubuntu sem journald para sshd: comente backend e use
+# logpath = %(sshd_log)s
+
+[recidive]
+# Quem for banido 5x em 1 dia fica fora por 1 semana em TODAS as portas.
+enabled  = true
+logpath  = /var/log/fail2ban.log
+bantime  = 1w
+findtime = 1d
+maxretry = 5
