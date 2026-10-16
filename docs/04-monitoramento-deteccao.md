@@ -9,6 +9,15 @@ sshd[1234]: Accepted publickey for sl from 203.0.113.10 port 51122 ssh2: ED25519
 Isso permite responder "quem entrou?" mesmo quando várias pessoas usam a
 mesma conta de serviço.
 
+## Em tempo real
+
+```bash
+journalctl -u ssh -u sshd -f      # Debian/Ubuntu usam "ssh"; RHEL usa "sshd"
+```
+
+Para histórico e alertas sem SIEM, Zabbix, Netdata, Prometheus
+(node_exporter + Loki) ou HetrixTools já resolvem bem em VPS.
+
 ## Consultas rápidas
 
 ```bash

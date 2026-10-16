@@ -20,11 +20,32 @@ soma de camadas:
 |---|---|---|
 | **Identidade** | Somente chave (Ed25519/FIDO2), sem root, allowlist de grupo | `sshd_config.d/00-hardening.conf` · `docs/01` |
 | **2º fator** | FIDO2 `ed25519-sk` ou chave + TOTP | `docs/01` · `docs/02` |
-| **Força bruta** | `MaxAuthTries`, `MaxStartups`, Fail2Ban com ban progressivo | `00-hardening.conf` · `fail2ban/` |
+| **Força bruta** | `MaxAuthTries`, `MaxStartups`, Fail2Ban ou CrowdSec | `00-hardening.conf` · `fail2ban/` · `docs/06` |
 | **Pivô** | Sem X11, agent forwarding, túneis | `00-hardening.conf` · `client/` |
 | **Criptografia** | KEX pós-quântico híbrido, AEAD, MACs ETM, sem SHA-1 | `sshd_config.d/10-crypto.conf` |
 | **Rede** | VPN/bastion, allowlist e rate limit no firewall | `docs/03` |
 | **Visibilidade** | `LogLevel VERBOSE`, FIM, alertas no SIEM, auditoria de drift | `docs/04` · `scripts/audit-ssh.sh` |
+
+## Do artigo para o repositório
+
+Este repo parte do guia [SSH seguro além de mudar a porta](https://helpsysadmin.com.br/blog/ssh-seguro-alem-da-porta/),
+do HelpSysAdmin, e transforma cada recomendação em arquivo versionado e testável:
+
+| Recomendação do artigo | Onde está aqui |
+|---|---|
+| Criar usuário sudo/wheel e diretório `.ssh` | `docs/00-primeiro-acesso.md` |
+| 1. Somente chave SSH, desligando a senha só após testar | `00-hardening.conf` · `docs/00` · trava no `apply-hardening.sh` |
+| 2. Root sem senha (`prohibit-password`) | `PermitRootLogin no` por padrão; quando usar `prohibit-password` em `docs/00` |
+| 3. Limitar usuários com `AllowUsers` | `AllowGroups ssh-users` (ou `AllowUsers`) |
+| 4. Fail2Ban ou CrowdSec | `fail2ban/jail.d/sshd.local` · `docs/06-crowdsec.md` |
+| 5. `MaxAuthTries 3` · `LoginGraceTime 20` | `00-hardening.conf` |
+| 6. Monitorar acessos em tempo real | `docs/04` · `scripts/audit-ssh.sh` |
+| Porta: só camada extra | `docs/03-rede-firewall.md` |
+
+**O que este repo acrescenta:** chaves Ed25519/FIDO2 e 2FA, bloqueio de
+forwarding (pivô), criptografia moderna com KEX pós-quântico, a pegadinha
+do drop-in do cloud-init, auditoria da config **efetiva** com `sshd -T`,
+detecção no SIEM e rollback automático.
 
 ## Estrutura
 
@@ -40,11 +61,13 @@ SSH_HARDENING_2026/
 ├── client/ssh_config.example   # hardening do lado cliente + ProxyJump
 ├── templates/issue.net         # banner legal
 ├── docs/
+│   ├── 00-primeiro-acesso.md
 │   ├── 01-chaves-ed25519-fido2.md
 │   ├── 02-2fa-totp.md
 │   ├── 03-rede-firewall.md
 │   ├── 04-monitoramento-deteccao.md
 │   ├── 05-rollback.md
+│   ├── 06-crowdsec.md
 │   └── CHECKLIST.md
 └── linkedin/                   # post + carrossel PDF de divulgação
 ```
@@ -55,7 +78,7 @@ SSH_HARDENING_2026/
 > acesso ao console do provedor. Leia [`docs/05-rollback.md`](docs/05-rollback.md).
 
 ```bash
-# 0. Pré-requisitos: usuário não-root com chave funcionando
+# 0. Pré-requisito: usuário não-root com chave funcionando (docs/00)
 sudo groupadd -f ssh-users
 sudo usermod -aG ssh-users $USER
 
@@ -92,7 +115,7 @@ Saída do auditor:
 `--json` gera saída para SIEM; o código de saída é o número de falhas
 (ideal para cron/CI detectar drift).
 
-### Fail2Ban
+### Fail2Ban (ou CrowdSec — veja docs/06)
 
 ```bash
 sudo cp fail2ban/jail.d/sshd.local /etc/fail2ban/jail.d/
@@ -121,7 +144,7 @@ ssh-audit seu-servidor.com.br
 
 ## Referências
 
-- Artigo que inspirou este repo: [SSH seguro além da porta — HelpSysAdmin](https://helpsysadmin.com.br/blog/ssh-seguro-alem-da-porta/)
+- Artigo base: [SSH seguro além de mudar a porta — HelpSysAdmin](https://helpsysadmin.com.br/blog/ssh-seguro-alem-da-porta/)
 - `man sshd_config` · `man ssh_config` · `man ssh-keygen`
 - [CIS Benchmarks — Distribution Independent Linux / Ubuntu / RHEL](https://www.cisecurity.org/cis-benchmarks)
 - [ssh-audit](https://github.com/jtesta/ssh-audit)

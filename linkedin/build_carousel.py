@@ -54,7 +54,7 @@ Mas quem mira no <b>seu</b> servidor faz isto:</p>
 layers = [
     ("01", "Identidade", "só chave, sem root, allowlist"),
     ("02", "Chaves fortes", "Ed25519 · FIDO2 · 2FA"),
-    ("03", "Força bruta", "limites + Fail2Ban progressivo"),
+    ("03", "Força bruta", "limites + Fail2Ban / CrowdSec"),
     ("04", "Pivô", "sem forwarding, use ProxyJump"),
     ("05", "Criptografia", "KEX pós-quântico, sem SHA-1"),
     ("06", "Rede", "VPN / bastion / allowlist"),
@@ -102,7 +102,7 @@ SLIDES.append(dict(title="02 · Chaves fortes", html=f'''
 SLIDES.append(dict(title="03 · Força bruta", html=f'''
 <h2>Menos tentativas, <span class="accent">menos janela</span>.</h2>
 {code([kv("MaxAuthTries", "3"),
-       kv("LoginGraceTime", "30"),
+       kv("LoginGraceTime", "20"),
        kv("MaxStartups", "10:30:60"),
        kv("ClientAliveInterval", "300"),
        "",
@@ -110,7 +110,7 @@ SLIDES.append(dict(title="03 · Força bruta", html=f'''
        kv("mode", "= aggressive"),
        kv("bantime.increment", "= true"),
        ("cmt", "# reincidente: 1h → 2h → 4h … até 1 semana")])}
-<p class="small">Com senha desligada, o Fail2Ban vira <b>redução de ruído + telemetria</b> para o SIEM.</p>
+<p class="small">Exposto à internet? <b>CrowdSec</b> soma reputação coletiva e pega bot distribuído. Com senha desligada, ambos viram <b>redução de ruído + telemetria</b> para o SIEM.</p>
 '''))
 
 # 7 — pivô
@@ -205,7 +205,7 @@ SLIDES.append(dict(kind="cta", html=f'''
 </ul>
 <div class="repo">{REPO}</div>
 <p class="small">Qual camada ainda falta no seu ambiente? Comenta aí 👇<br>
-<span class="muted">Inspirado em "SSH seguro além da porta" — HelpSysAdmin</span></p>
+<span class="muted">Base: "SSH seguro além de mudar a porta" — HelpSysAdmin</span></p>
 '''))
 
 CSS = """

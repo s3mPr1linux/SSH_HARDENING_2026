@@ -2,6 +2,15 @@
 
 Marque conforme aplica. IDs batem com o `scripts/audit-ssh.sh`.
 
+## Checklist rápido (o mínimo)
+- [ ] Login por chave SSH
+- [ ] Root com senha desativado
+- [ ] Usuários limitados (`AllowUsers`/`AllowGroups`)
+- [ ] Fail2Ban ou CrowdSec
+- [ ] Monitoramento dos acessos
+
+O restante abaixo é o que transforma o mínimo em defesa em profundidade.
+
 ## Antes de começar
 - [ ] Sessão SSH extra aberta (sua saída de emergência)
 - [ ] Acesso ao console do provedor/IPMI confirmado
@@ -19,9 +28,9 @@ Marque conforme aplica. IDs batem com o `scripts/audit-ssh.sh`.
 
 ## Força bruta
 - [ ] SSH-06 `MaxAuthTries 3`
-- [ ] SSH-07 `LoginGraceTime 30`
+- [ ] SSH-07 `LoginGraceTime 20`
 - [ ] SSH-08 `MaxStartups 10:30:60`
-- [ ] Fail2Ban ou CrowdSec ativo com ban progressivo
+- [ ] Fail2Ban (ban progressivo) **ou** CrowdSec (reputação coletiva) ativo
 
 ## Pivô e movimento lateral
 - [ ] SSH-09 `X11Forwarding no`
