@@ -69,7 +69,6 @@ SSH_HARDENING_2026/
 │   ├── 05-rollback.md
 │   ├── 06-crowdsec.md
 │   └── CHECKLIST.md
-└── linkedin/                   # post + carrossel PDF de divulgação
 ```
 
 ## Uso rápido
